@@ -10,11 +10,14 @@ def setup_distributed():
     """Initialize the distributed process group"""
     os.environ["MASTER_ADDR"] = "localhost"
     os.environ["MASTER_PORT"] = "29500"  # Use a different port if needed
+    rank = int(os.environ["RANK"])
+    world_size = int(os.environ["WORLD_SIZE"])
+    if torch.cuda.is_available():
+        torch.cuda.set_device(rank)
 
-    # dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo")
-    dist.init_process_group(backend="nccl" )
-    rank = dist.get_rank()
-    world_size = dist.get_world_size()
+    dist.init_process_group(backend="nccl" if torch.cuda.is_available() else "gloo", rank = rank, world_size = world_size)
+    # dist.init_process_group(backend="nccl" )
+
     return rank, world_size
 
 
